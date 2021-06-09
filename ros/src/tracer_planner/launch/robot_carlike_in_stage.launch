@@ -1,0 +1,70 @@
+<!-- 
+  Simulate a carlike robot with the teb_local_planner in stage:
+  - stage
+  - map_server
+  - move_base
+  - static map
+  - amcl
+  - rviz view
+ -->
+<launch>
+	<!-- Arguments -->
+	<arg name="open_rviz" default="true"/>
+
+	<!-- AirSim Node -->
+	<include file="$(find tracer_planner)/launch/airsim_node_enu.launch"/>
+
+	<!-- TFs -->
+	<node pkg="tf" type="static_transform_publisher" name="base_to_scan" args="0 0 2 0.0 -0.0 0.0 Car_1/odom_local_enu ScanCustom 10" /> 
+	<node pkg="tf" type="static_transform_publisher" name="map_to_world" args="-1.5 0.5 0 -1.5708 3.14159 0.0 map world_ned 10" />
+	<node pkg="tf" type="static_transform_publisher" name="rotated_footprint" args="0 0 0 1.5708 0.0 0.0 Car_1/odom_local_enu Car_1/odom_local_enu_rot 10" />
+	
+	<!-- pointcloud_to_laserscan Node -->
+	<node pkg="pointcloud_to_laserscan" type="pointcloud_to_laserscan_node" name="pointcloud_to_laserscan" >
+		<remap from="cloud_in" to="/airsim_node/Car_1/lidar/LidarCustom"/>
+		<param name="target_frame" value="ScanCustom" />
+		<param name="range_max" value="100.0" /> 
+	</node>
+
+
+    <!-- Navigation Node-->
+	<node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
+	
+  	  	<rosparam file="$(find tracer_planner)/cfg/carlike/costmap_common_params.yaml" command="load" ns="global_costmap" />
+  	 	<rosparam file="$(find tracer_planner)/cfg/carlike/costmap_common_params.yaml" command="load" ns="local_costmap" />
+  		<rosparam file="$(find tracer_planner)/cfg/carlike/local_costmap_params.yaml" command="load" />
+  		<rosparam file="$(find tracer_planner)/cfg/carlike/global_costmap_params.yaml" command="load" />
+  		<rosparam file="$(find tracer_planner)/cfg/carlike/teb_local_planner_params.yaml" command="load" />
+
+		<param name="base_global_planner" value="global_planner/GlobalPlanner" />
+		<param name="planner_frequency" value="1.0" />
+		<param name="planner_patience" value="5.0" />
+
+		<param name="base_local_planner" value="teb_local_planner/TebLocalPlannerROS" />
+		<param name="controller_frequency" value="5.0" />
+		<param name="controller_patience" value="15.0" />
+
+        <param name="clearing_rotation_allowed" value="false" /> 
+	</node>
+
+
+	<!--  Map Server Node  -->
+	<arg name="map_file" default="$(find tracer_planner)/maps/mapa.yaml"/>
+ 	<node name="map_server" pkg="map_server" type="map_server" args="$(arg map_file)" output="screen"/>
+
+	<node pkg="amcl" type="amcl" name="amcl" output="screen">
+		<rosparam file="$(find tracer_planner)/cfg/amcl_params.yaml" command="load" />
+	    <param name="initial_pose_x"            value="2"/>
+		<param name="initial_pose_y"            value="2"/>
+		<param name="initial_pose_a"            value="0"/>
+	</node>
+
+	<node pkg="tracer_planner" type="Twist2CarControl" name="Twist2CarControl" output="screen" />	
+
+	<!--  rviz  -->
+	<group if="$(arg open_rviz)"> 
+		<node name="rviz" pkg="rviz" type="rviz" args="-d $(find tracer_planner)/cfg/rviz_navigation.rviz"/>
+    </group>
+	  
+
+</launch>

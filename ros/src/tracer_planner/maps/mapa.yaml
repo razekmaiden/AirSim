@@ -1,0 +1,7 @@
+image: /home/joseluis/Proyectos/unreal_engine/AirSim/ros/src/tracer_planner/maps/mapa.pgm
+resolution: 0.500000
+origin: [-234.000000, -207.500000, 0.000000]
+negate: 0
+occupied_thresh: 0.65
+free_thresh: 0.196
+

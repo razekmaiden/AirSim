@@ -1,0 +1,32 @@
+<launch>
+<param name="use_sim_time" value="true"/>
+
+<!-- Arguments -->
+<arg name="open_rviz" default="true"/>
+
+<!-- AirSim Node -->
+<!-- <include file="$(find tracer_planner)/launch/airsim_node_enu.launch"/> -->
+
+<!-- TFs -->
+<node pkg="tf" type="static_transform_publisher" name="map_to_world" args="-1.5 0.5 0 -1.5708 3.14159 0.0 map world_ned 10" />
+
+<!-- Octomap Server Node -->
+<node pkg="octomap_server" type="octomap_server_node" name="octomap_server" args ="/home/joseluis/Proyectos/unreal_engine/AirSim/ros/src/tracer_planner/scripts/map_rescaled.binvox_bkp_2.bt">
+    <!-- data source to integrate (PointCloud2) -->
+    <remap from="cloud_in" to="/airsim_node/Car_1/lidar/LidarCustom" />
+
+    <!-- fixed map frame (set to 'map' if SLAM or localization running!) default 'odom_combined'-->
+    <param name="frame_id" type="string" value="map" />
+    <param name="base_frame_id" type="string" value="Car_1" />
+</node>
+
+<!-- Rosbag -->
+<arg name="bag_file" default="$(find tracer_planner)/bags/2021-05-20-18-44-30.bag"/>
+<node pkg="rosbag" type="play" name="player" output="screen" args="--clock -l $(arg bag_file)"/>
+
+<!-- rviz -->
+  <group if="$(arg open_rviz)"> 
+    <node pkg="rviz" type="rviz" name="rviz" required="true" args="-d $(find tracer_planner)/rviz/map_generation.rviz" />
+  </group>
+
+</launch>

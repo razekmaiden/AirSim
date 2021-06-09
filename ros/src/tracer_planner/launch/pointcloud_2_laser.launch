@@ -1,0 +1,24 @@
+<launch>
+
+    <!-- Arguments -->
+	<arg name="open_rviz" default="true"/>
+
+	<!-- AirSim Node -->
+	<include file="$(find tracer_planner)/launch/airsim_node_enu.launch"/>
+
+	<!-- TFs -->
+	<node pkg="tf" type="static_transform_publisher" name="base_to_scan" args="0 0 1.760 0.0 -0.0 0.0 Car_1 ScanCustom 10" />
+
+	<!-- pointcloud_to_laserscan Node -->
+	<node pkg="pointcloud_to_laserscan" type="pointcloud_to_laserscan_node" name="pointcloud_to_laserscan" >
+		<remap from="cloud_in" to="/airsim_node/Car_1/lidar/LidarCustom"/>
+		<param name="target_frame" value="ScanCustom" />
+		<param name="range_max" value="100.0" /> 
+	</node>
+
+	<!-- rviz -->
+	<group if="$(arg open_rviz)"> 
+	    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find tracer_planner)/rviz/lidar2scan.rviz"/>
+    </group>
+	
+</launch>

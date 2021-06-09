@@ -387,3 +387,13 @@ build_docs/
 # api docs
 PythonClient/docs/_build
 /LogViewer/LogViewer/publish.cmd
+
+Unreal/Environments/Africa/
+
+Unreal/Environments/LandscapeMountains/
+
+Unreal/Environments/Africa.zip
+
+Unreal/Environments/LandscapeMountains.zip
+
+Unreal/Environments/Blocks/Content/VehicleAdv/
